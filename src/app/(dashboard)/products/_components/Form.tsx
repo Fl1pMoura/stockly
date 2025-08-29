@@ -18,6 +18,7 @@ import { Input } from "@/app/_components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
+import { toast } from "sonner";
 import { z } from "zod";
 
 interface IProductForm {
@@ -67,6 +68,8 @@ const ProductForm = ({ defaultValues }: IProductForm) => {
 
   const onSubmit = (data: z.infer<typeof productFormSchema>) => {
     console.log(data);
+    toast.success("Produto salvo com sucesso");
+    form.reset();
   };
 
   return (

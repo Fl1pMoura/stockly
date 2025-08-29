@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+} from "@/app/_components/ui/alert-dialog";
 import { Button } from "@/app/_components/ui/button";
 import { Dialog, DialogTrigger } from "@/app/_components/ui/dialog";
 import {
@@ -12,6 +16,7 @@ import { cn } from "@/app/_lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { ClipboardCopy, Ellipsis, SquarePen, Trash } from "lucide-react";
 import { toast } from "sonner";
+import DeleteProductDialog from "./DeleteDialog";
 import ProductForm from "./Form";
 
 // This type is used to define the shape of our data.
@@ -132,34 +137,41 @@ export const productTableColumns: ColumnDef<Products>[] = [
         <div className="p-4">
           <span>
             <Dialog>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant={"ghost"}
-                    className="text-green-500 hover:text-green-700"
-                  >
-                    <Ellipsis />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    onClick={async () => {
-                      await navigator.clipboard.writeText(row.original.id);
-                      toast.success("ID copiado para a área de transferência");
-                    }}
-                  >
-                    <ClipboardCopy size={16} /> Copiar ID
-                  </DropdownMenuItem>
-                  <DialogTrigger asChild>
-                    <DropdownMenuItem>
-                      <SquarePen size={16} /> Editar
+              <AlertDialog>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant={"ghost"}
+                      className="text-green-500 hover:text-green-700"
+                    >
+                      <Ellipsis />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      onClick={async () => {
+                        await navigator.clipboard.writeText(row.original.id);
+                        toast.success(
+                          "ID copiado para a área de transferência",
+                        );
+                      }}
+                    >
+                      <ClipboardCopy size={16} /> Copiar ID
                     </DropdownMenuItem>
-                  </DialogTrigger>
-                  <DropdownMenuItem>
-                    <Trash size={16} /> Excluir
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <DialogTrigger asChild>
+                      <DropdownMenuItem>
+                        <SquarePen size={16} /> Editar
+                      </DropdownMenuItem>
+                    </DialogTrigger>
+                    <AlertDialogTrigger asChild>
+                      <DropdownMenuItem>
+                        <Trash size={16} /> Excluir
+                      </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <DeleteProductDialog />
+              </AlertDialog>
               <ProductForm
                 defaultValues={{
                   name: row.original.name,
