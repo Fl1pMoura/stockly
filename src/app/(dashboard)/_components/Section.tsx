@@ -1,10 +1,11 @@
-import Button from "./Button";
+import { Button } from "@/app/_components/ui/button";
 
 interface IDashboardSection {
   page: string;
   pageTitle: string;
   buttonText?: string;
   icon?: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 const DashboardSection = ({
@@ -12,21 +13,23 @@ const DashboardSection = ({
   pageTitle,
   buttonText,
   icon,
+  children,
 }: IDashboardSection) => {
   return (
-    <section className="p-9 pb-4">
-      <header className="flex justify-between gap-6">
+    <section className="w-full p-9 pb-4">
+      <header className="flex w-full justify-between gap-6">
         <div className="space-y-2">
           <span className="text-xs font-semibold text-green-100">{page}</span>
           <h2 className="text-xl font-semibold text-slate-900">{pageTitle}</h2>
         </div>
         {buttonText && (
-          <Button>
+          <Button variant={"default"}>
             {icon}
             {buttonText}
           </Button>
         )}
       </header>
+      {children}
     </section>
   );
 };
