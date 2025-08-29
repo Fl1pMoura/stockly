@@ -9,30 +9,35 @@ import { productTableColumns } from "./_components/TableColumns";
 const Products = () => {
   const products = [
     {
+      id: "1",
       name: "Produto 1",
       price: 100,
       stock: 10,
       status: "IN_STOCK",
     },
     {
+      id: "2",
       name: "Produto 2",
       price: 200,
       stock: 20,
       status: "IN_STOCK",
     },
     {
+      id: "3",
       name: "Produto 3",
       price: 300,
       stock: 30,
       status: "OUT_OF_STOCK",
     },
     {
+      id: "4",
       name: "Produto 4",
       price: 400,
       stock: 40,
       status: "OUT_OF_STOCK",
     },
     {
+      id: "5",
       name: "Produto 5",
       price: 500,
       stock: 50,

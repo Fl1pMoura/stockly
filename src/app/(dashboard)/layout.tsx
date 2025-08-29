@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Toaster } from "../_components/ui/sonner";
 import "../globals.css";
 import Aside from "./_components/Aside";
 
@@ -24,6 +25,7 @@ export default function RootLayout({
         <main className="flex">
           <Aside />
           {children}
+          <Toaster />
         </main>
       </body>
     </html>

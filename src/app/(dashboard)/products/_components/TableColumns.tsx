@@ -1,13 +1,23 @@
 "use client";
 
 import { Button } from "@/app/_components/ui/button";
+import { Dialog, DialogTrigger } from "@/app/_components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/app/_components/ui/dropdown-menu";
 import { cn } from "@/app/_lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
-import { Ellipsis } from "lucide-react";
+import { ClipboardCopy, Ellipsis, SquarePen, Trash } from "lucide-react";
+import { toast } from "sonner";
+import ProductForm from "./Form";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type Products = {
+  id: string;
   name: string;
   price: number;
   stock: number;
@@ -121,12 +131,43 @@ export const productTableColumns: ColumnDef<Products>[] = [
       return (
         <div className="p-4">
           <span>
-            <Button
-              variant={"ghost"}
-              className="text-green-500 hover:text-green-700"
-            >
-              <Ellipsis />
-            </Button>
+            <Dialog>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant={"ghost"}
+                    className="text-green-500 hover:text-green-700"
+                  >
+                    <Ellipsis />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(row.original.id);
+                      toast.success("ID copiado para a área de transferência");
+                    }}
+                  >
+                    <ClipboardCopy size={16} /> Copiar ID
+                  </DropdownMenuItem>
+                  <DialogTrigger asChild>
+                    <DropdownMenuItem>
+                      <SquarePen size={16} /> Editar
+                    </DropdownMenuItem>
+                  </DialogTrigger>
+                  <DropdownMenuItem>
+                    <Trash size={16} /> Excluir
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <ProductForm
+                defaultValues={{
+                  name: row.original.name,
+                  value: row.original.price,
+                  stock: row.original.stock,
+                }}
+              />
+            </Dialog>
           </span>
         </div>
       );
