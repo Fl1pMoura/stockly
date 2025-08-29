@@ -1,18 +1,14 @@
-import { Button } from "@/app/_components/ui/button";
-
 interface IDashboardSection {
   page: string;
   pageTitle: string;
-  buttonText?: string;
-  icon?: React.ReactNode;
   children?: React.ReactNode;
+  button?: React.ReactNode;
 }
 
 const DashboardSection = ({
   page,
   pageTitle,
-  buttonText,
-  icon,
+  button,
   children,
 }: IDashboardSection) => {
   return (
@@ -22,12 +18,7 @@ const DashboardSection = ({
           <span className="text-xs font-semibold text-green-100">{page}</span>
           <h2 className="text-xl font-semibold text-slate-900">{pageTitle}</h2>
         </div>
-        {buttonText && (
-          <Button variant={"default"}>
-            {icon}
-            {buttonText}
-          </Button>
-        )}
+        {button}
       </header>
       {children}
     </section>
