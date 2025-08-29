@@ -10,6 +10,21 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --color-green-50: oklch(97.3%, 4%, 182.724%);
+  --color-green-100: oklch(63.1%, 30.75%, 171.376%);
+  --color-green-200: oklch(20.7%, 4.25%, 195.91%);
+
+  --color-slate-50: oklch(98.4%, 0.75%, 247.858%);
+  --color-slate-100: oklch(96.8%, 1.75%, 247.896%);
+  --color-slate-200: oklch(92.9%, 3.25%, 255.508%);
+  --color-slate-300: oklch(86.9%, 5%, 252.894%);
+  --color-slate-400: oklch(71.1%, 8.75%, 256.788%);
+  --color-slate-500: oklch(55.4%, 10.25%, 257.417%);
+  --color-slate-600: oklch(44.6%, 9.25%, 257.281%);
+  --color-slate-700: oklch(37.2%, 9.75%, 257.287%);
+  --color-slate-800: oklch(27.9%, 9.25%, 260.031%);
+  --color-slate-900: oklch(20.8%, 10%, 265.755%);
 }
 
 @media (prefers-color-scheme: dark) {
