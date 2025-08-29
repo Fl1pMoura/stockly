@@ -7,7 +7,7 @@ import { cn } from "../../_lib/utils";
 const Aside = () => {
   const pathname = usePathname();
   return (
-    <aside className="h-screen w-full max-w-[272px] bg-white py-6">
+    <aside className="h-screen w-full max-w-[272px] flex-1 bg-white py-6">
       <h1 className="px-8 text-2xl font-black text-green-100 uppercase">
         Stockly
       </h1>
