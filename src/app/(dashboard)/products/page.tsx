@@ -1,77 +1,23 @@
-import { Button } from "@/app/_components/ui/button";
 import { DataTable } from "@/app/_components/ui/data-table";
-import { Dialog, DialogTrigger } from "@/app/_components/ui/dialog";
-import { Plus } from "lucide-react";
+import { Dialog } from "@/app/_components/ui/dialog";
+import { getProducts } from "@/app/_data/products/get-products";
 import DashboardSection from "../_components/Section";
-import ProductForm from "./_components/Form";
 import { productTableColumns } from "./_components/TableColumns";
+import CreateProductButton from "./_components/create-product-button";
 
-const Products = () => {
-  const products = [
-    {
-      id: "1",
-      name: "Produto 1",
-      price: 100,
-      stock: 10,
-      status: "IN_STOCK",
-    },
-    {
-      id: "2",
-      name: "Produto 2",
-      price: 200,
-      stock: 20,
-      status: "IN_STOCK",
-    },
-    {
-      id: "3",
-      name: "Produto 3",
-      price: 300,
-      stock: 30,
-      status: "OUT_OF_STOCK",
-    },
-    {
-      id: "4",
-      name: "Produto 4",
-      price: 400,
-      stock: 40,
-      status: "OUT_OF_STOCK",
-    },
-    {
-      id: "5",
-      name: "Produto 5",
-      price: 500,
-      stock: 50,
-      status: "OUT_OF_STOCK",
-    },
-  ];
+const Products = async () => {
+  const products = await getProducts();
   return (
     <Dialog>
       <DashboardSection
         page="Produtos"
         pageTitle="Gestão de Produtos"
-        button={
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus size={24} />
-                Novo produto
-              </Button>
-            </DialogTrigger>
-            <ProductForm />
-          </Dialog>
-        }
+        button={<CreateProductButton />}
       >
         <div className="rounded-[16px] bg-white p-2">
           <DataTable columns={productTableColumns} data={products} />
         </div>
       </DashboardSection>
-      <ProductForm
-        defaultValues={{
-          name: "Produto 1",
-          value: 100,
-          stock: 10,
-        }}
-      />
     </Dialog>
   );
 };

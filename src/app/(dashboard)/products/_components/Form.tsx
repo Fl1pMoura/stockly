@@ -1,4 +1,6 @@
 "use client";
+import { upsertProduct } from "@/app/_actions/product/upsert-product";
+import { upsertProductSchema } from "@/app/_actions/product/upsert-product/schema";
 import { Button } from "@/app/_components/ui/button";
 import {
   DialogClose,
@@ -23,51 +25,29 @@ import { z } from "zod";
 
 interface IProductForm {
   defaultValues?: {
+    id?: string;
     name: string;
-    value: number;
+    priceInCents: number;
     stock: number;
   };
+  setIsOpen: (open: boolean) => void;
 }
 
-const ProductForm = ({ defaultValues }: IProductForm) => {
+const ProductForm = ({ defaultValues, setIsOpen }: IProductForm) => {
   const isEdit = defaultValues;
-  const productFormSchema = z.object({
-    name: z
-      .string()
-      .min(1, {
-        message: "Nome é obrigatório",
-      })
-      .trim(),
-    value: z
-      .number()
-      .positive({
-        message: "Valor é obrigatório",
-      })
-      .min(0, {
-        message: "Valor deve ser maior que 0",
-      })
-      .or(z.string()),
-    stock: z
-      .number()
-      .positive({
-        message: "Estoque é obrigatório",
-      })
-      .min(1, {
-        message: "Estoque deve ser maior que 0",
-      }),
-  });
 
-  const form = useForm<z.infer<typeof productFormSchema>>({
-    resolver: zodResolver(productFormSchema),
+  const form = useForm<z.infer<typeof upsertProductSchema>>({
+    resolver: zodResolver(upsertProductSchema),
     defaultValues: defaultValues ?? {
       name: "",
-      value: 0,
+      priceInCents: 0,
       stock: 1,
     },
   });
 
-  const onSubmit = (data: z.infer<typeof productFormSchema>) => {
-    console.log(data);
+  const onSubmit = (data: z.infer<typeof upsertProductSchema>) => {
+    data.priceInCents = Number(data.priceInCents) * 100;
+    upsertProduct(data);
     toast.success("Produto salvo com sucesso");
     form.reset();
   };
@@ -97,7 +77,7 @@ const ProductForm = ({ defaultValues }: IProductForm) => {
           />
           <FormField
             control={form.control}
-            name="value"
+            name="priceInCents"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Valor unitário</FormLabel>

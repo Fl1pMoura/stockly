@@ -1,30 +1,15 @@
 "use client";
 
-import {
-  AlertDialog,
-  AlertDialogTrigger,
-} from "@/app/_components/ui/alert-dialog";
-import { Button } from "@/app/_components/ui/button";
-import { Dialog, DialogTrigger } from "@/app/_components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/app/_components/ui/dropdown-menu";
 import { cn } from "@/app/_lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
-import { ClipboardCopy, Ellipsis, SquarePen, Trash } from "lucide-react";
-import { toast } from "sonner";
-import DeleteProductDialog from "./DeleteDialog";
-import ProductForm from "./Form";
+import ProductTableDropdownMenu from "./TableDropdownMenu";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type Products = {
   id: string;
   name: string;
-  price: number;
+  priceInCents: number;
   stock: number;
   status: string;
 };
@@ -48,7 +33,7 @@ export const productTableColumns: ColumnDef<Products>[] = [
     },
   },
   {
-    accessorKey: "price",
+    accessorKey: "priceInCents",
     header: () => {
       return (
         <div className="p-4">
@@ -63,7 +48,7 @@ export const productTableColumns: ColumnDef<Products>[] = [
             {new Intl.NumberFormat("pt-BR", {
               style: "currency",
               currency: "BRL",
-            }).format(row.getValue("price"))}
+            }).format(row.getValue("priceInCents"))}
           </span>
         </div>
       );
@@ -133,56 +118,7 @@ export const productTableColumns: ColumnDef<Products>[] = [
       );
     },
     cell: ({ row }) => {
-      return (
-        <div className="p-4">
-          <span>
-            <Dialog>
-              <AlertDialog>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant={"ghost"}
-                      className="text-green-500 hover:text-green-700"
-                    >
-                      <Ellipsis />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem
-                      onClick={async () => {
-                        await navigator.clipboard.writeText(row.original.id);
-                        toast.success(
-                          "ID copiado para a área de transferência",
-                        );
-                      }}
-                    >
-                      <ClipboardCopy size={16} /> Copiar ID
-                    </DropdownMenuItem>
-                    <DialogTrigger asChild>
-                      <DropdownMenuItem>
-                        <SquarePen size={16} /> Editar
-                      </DropdownMenuItem>
-                    </DialogTrigger>
-                    <AlertDialogTrigger asChild>
-                      <DropdownMenuItem>
-                        <Trash size={16} /> Excluir
-                      </DropdownMenuItem>
-                    </AlertDialogTrigger>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <DeleteProductDialog />
-              </AlertDialog>
-              <ProductForm
-                defaultValues={{
-                  name: row.original.name,
-                  value: row.original.price,
-                  stock: row.original.stock,
-                }}
-              />
-            </Dialog>
-          </span>
-        </div>
-      );
+      return <ProductTableDropdownMenu product={row.original} />;
     },
   },
 ];
