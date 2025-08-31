@@ -56,7 +56,7 @@ const ProductTableDropdownMenu = ({ product }: { product: Products }) => {
                 </AlertDialogTrigger>
               </DropdownMenuContent>
             </DropdownMenu>
-            <DeleteProductDialog />
+            <DeleteProductDialog id={product.id} />
           </AlertDialog>
           <ProductForm
             setIsOpen={setIsEditFormOpen}

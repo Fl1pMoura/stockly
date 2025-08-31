@@ -1,3 +1,5 @@
+import { deleteProduct } from "@/app/_actions/product/delete-product";
+import { deleteProductSchema } from "@/app/_actions/product/delete-product/schema";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -8,10 +10,13 @@ import {
 } from "@/app/_components/ui/alert-dialog";
 import { Button } from "@/app/_components/ui/button";
 import { toast } from "sonner";
+import z from "zod";
 
-const DeleteProductDialog = () => {
+const DeleteProductDialog = ({ id }: z.infer<typeof deleteProductSchema>) => {
   const handleDelete = async () => {
-    console.log("Excluir");
+    await deleteProduct({
+      id,
+    });
     toast.success("Produto excluído com sucesso");
   };
   return (
