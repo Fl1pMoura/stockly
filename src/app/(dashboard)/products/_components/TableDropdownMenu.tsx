@@ -18,6 +18,7 @@ import ProductForm from "./Form";
 import { Products } from "./TableColumns";
 
 const ProductTableDropdownMenu = ({ product }: { product: Products }) => {
+  console.log(product);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   return (
     <div className="p-4">
@@ -27,6 +28,7 @@ const ProductTableDropdownMenu = ({ product }: { product: Products }) => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
+                  aria-details={product.name}
                   variant={"ghost"}
                   className="text-green-500 hover:text-green-700"
                 >

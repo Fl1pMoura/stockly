@@ -48,7 +48,7 @@ export const productTableColumns: ColumnDef<Products>[] = [
             {new Intl.NumberFormat("pt-BR", {
               style: "currency",
               currency: "BRL",
-            }).format(row.getValue("priceInCents"))}
+            }).format(Number(row.getValue("priceInCents")))}
           </span>
         </div>
       );

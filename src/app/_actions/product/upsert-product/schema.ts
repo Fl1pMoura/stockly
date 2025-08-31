@@ -19,7 +19,7 @@ const upsertProductSchema = z.object({
       error: "Nome é obrigatório",
     })
     .trim(),
-  priceInCents: z.number().min(0, {
+  priceInCents: z.number().min(1, {
     error: "Preço é obrigatório",
   }),
   stock: z

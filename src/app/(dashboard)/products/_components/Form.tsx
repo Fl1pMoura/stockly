@@ -35,10 +35,11 @@ interface IProductForm {
 
 const ProductForm = ({ defaultValues, setIsOpen }: IProductForm) => {
   const isEdit = defaultValues;
+  console.log("defaultValues", defaultValues);
 
   const form = useForm<z.infer<typeof upsertProductSchema>>({
     resolver: zodResolver(upsertProductSchema),
-    defaultValues: defaultValues ?? {
+    values: defaultValues ?? {
       name: "",
       priceInCents: 0,
       stock: 1,
@@ -50,6 +51,7 @@ const ProductForm = ({ defaultValues, setIsOpen }: IProductForm) => {
     upsertProduct(data);
     toast.success("Produto salvo com sucesso");
     form.reset();
+    setIsOpen(false);
   };
 
   return (
