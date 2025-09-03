@@ -16,18 +16,27 @@ import {
   SheetDescription,
   SheetTitle,
 } from "@/app/_components/ui/sheet";
+import { Product } from "@/generated/prisma";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Trash } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import z from "zod";
 
-interface ISalesForm {
+interface ISalesFormProps {
+  products: Product[];
   productOption: ComboboxOption[];
   setIsOpen?: (open: boolean) => void;
 }
 
-const SalesForm = ({ productOption, setIsOpen }: ISalesForm) => {
+interface SelectedProduct {
+  id: string;
+  name: string;
+  priceInCents: number;
+  quantity: number;
+}
+
+const SalesForm = ({ productOption, setIsOpen, products }: ISalesFormProps) => {
   const form = useForm<z.infer<typeof upsertSalesSchema>>({
     resolver: zodResolver(upsertSalesSchema),
     values: {
@@ -35,29 +44,58 @@ const SalesForm = ({ productOption, setIsOpen }: ISalesForm) => {
       quantity: 1,
     },
   });
+  const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>(
+    [],
+  );
 
   const onSubmit = (data: z.infer<typeof upsertSalesSchema>) => {
-    toast.success("Venda salva com sucesso");
-    form.reset();
-    setIsOpen?.(false);
+    const selectecProduct = products.find(
+      (product) => product.id === data.productId,
+    );
+    if (!selectecProduct) {
+      return;
+    }
+    setSelectedProducts((currentProducts) => {
+      const existingProduct = currentProducts.find(
+        (product) => product.id === selectecProduct.id,
+      );
+      if (existingProduct) {
+        const productOutOfStock =
+          existingProduct.quantity + data.quantity > selectecProduct.stock;
+        if (productOutOfStock) {
+          form.setError("quantity", {
+            message: "Quantidade maior que o estoque disponível",
+          });
+          return currentProducts;
+        }
+        form.reset();
+        return [
+          ...currentProducts.filter(
+            (product) => product.id !== selectecProduct.id,
+          ),
+          {
+            id: selectecProduct.id,
+            name: selectecProduct.name,
+            priceInCents: selectecProduct.priceInCents,
+            quantity: existingProduct.quantity + data.quantity,
+          },
+        ];
+      }
+      form.reset();
+      return [
+        ...currentProducts,
+        {
+          id: selectecProduct.id,
+          name: selectecProduct.name,
+          priceInCents: selectecProduct.priceInCents,
+          quantity: data.quantity,
+        },
+      ];
+    });
   };
 
-  const [selectedProducts, setSelectedProducts] = useState<
-    z.infer<typeof upsertSalesSchema>[]
-  >([]);
-
-  const handleAddProduct = () => {
-    const newProduct = form.getValues();
-    let productExists = false;
-    selectedProducts.map((item) => {
-      if (item.productId === newProduct.productId) {
-        item.quantity = Number(newProduct.quantity) + Number(item.quantity);
-        productExists = true;
-      }
-    });
-    if (!productExists) {
-      setSelectedProducts([...selectedProducts, newProduct]);
-    }
+  const handleRemoveProduct = (index: number) => {
+    setSelectedProducts(selectedProducts.filter((_, i) => i !== index));
   };
 
   return (
@@ -101,16 +139,88 @@ const SalesForm = ({ productOption, setIsOpen }: ISalesForm) => {
               <FormItem>
                 <FormLabel>Quantidade</FormLabel>
                 <FormControl>
-                  <Input {...field} type="number" min={1} max={100} step={1} />
+                  <Input {...field} type="number" min={1} step={1} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button className="w-full" type="submit" onClick={handleAddProduct}>
+          <Button className="w-full" type="submit">
             Adicionar produto
           </Button>
         </form>
+        {selectedProducts.length > 0 && (
+          <>
+            <div className="mt-6">
+              <h2 className="mb-2 text-base font-semibold text-slate-900">
+                Produtos Adicionados
+              </h2>
+              <ul className="max-h-[400px] space-y-2 overflow-auto">
+                {selectedProducts.map((_, index) => (
+                  <li
+                    key={index}
+                    className="flex items-center justify-between rounded-[8px] bg-slate-50 p-4"
+                  >
+                    <div>
+                      <p className="font-medium">
+                        {
+                          productOption.find(
+                            (item) => item.value === selectedProducts[index].id,
+                          )?.label
+                        }
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        Quantidade: {selectedProducts[index].quantity}
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        Preço Unitário:{" "}
+                        {Intl.NumberFormat("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        }).format(selectedProducts[index].priceInCents)}
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        Total:{" "}
+                        {Intl.NumberFormat("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        }).format(
+                          selectedProducts[index].priceInCents *
+                            selectedProducts[index].quantity,
+                        )}
+                      </p>
+                    </div>
+                    <Button
+                      className="h-8 w-8"
+                      type="button"
+                      variant={"destructive"}
+                      onClick={() => handleRemoveProduct(index)}
+                    >
+                      <Trash />
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="mt-6">
+              <h2 className="flex items-center justify-between rounded-[8px] bg-slate-100 p-4 text-base font-semibold text-slate-900">
+                Total:{" "}
+                {Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(
+                  selectedProducts.reduce((acc, item) => {
+                    return acc + item.priceInCents * item.quantity;
+                  }, 0),
+                )}
+              </h2>
+
+              <Button className="mt-6 w-full" type="submit">
+                Salvar venda
+              </Button>
+            </div>
+          </>
+        )}
       </Form>
     </SheetContent>
   );

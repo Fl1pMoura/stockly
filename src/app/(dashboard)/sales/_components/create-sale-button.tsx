@@ -20,7 +20,7 @@ const CreateSaleButton = async () => {
           Nova venda
         </Button>
       </SheetTrigger>
-      <SalesForm productOption={productOptions} />
+      <SalesForm products={products} productOption={productOptions} />
     </Sheet>
   );
 };

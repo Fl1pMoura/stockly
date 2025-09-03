@@ -12,7 +12,9 @@ import { z } from "zod";
 // }
 
 const upsertSalesSchema = z.object({
-  productId: z.uuid().optional(),
+  productId: z.uuid({
+    error: "Produto é obrigatório",
+  }),
   quantity: z.coerce.number<number>().min(1, {
     error: "Quantidade é obrigatória",
   }),
