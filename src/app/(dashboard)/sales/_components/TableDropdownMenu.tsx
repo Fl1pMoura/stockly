@@ -3,31 +3,41 @@ import {
   AlertDialogTrigger,
 } from "@/app/_components/ui/alert-dialog";
 import { Button } from "@/app/_components/ui/button";
-import { Dialog, DialogTrigger } from "@/app/_components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/app/_components/ui/dropdown-menu";
+import { Sheet, SheetTrigger } from "@/app/_components/ui/sheet";
+import { Prisma } from "@/generated/prisma";
 import { ClipboardCopy, Ellipsis, SquarePen, Trash } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import DeleteProductDialog from "./DeleteDialog";
-import ProductForm from "./Form";
-import { Products } from "./TableColumns";
 
-const ProductTableDropdownMenu = ({ product }: { product: Products }) => {
+const SalesTableDropdownMenu = ({
+  sale,
+}: {
+  sale: Prisma.SalesGetPayload<{
+    include: {
+      SalesToProduct: {
+        include: {
+          product: true;
+        };
+      };
+    };
+  }>;
+}) => {
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   return (
     <div className="p-4">
       <span>
-        <Dialog open={isEditFormOpen} onOpenChange={setIsEditFormOpen}>
+        <Sheet open={isEditFormOpen} onOpenChange={setIsEditFormOpen}>
           <AlertDialog>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  aria-details={product.name}
+                  aria-details={sale.id}
                   variant={"ghost"}
                   className="text-green-500 hover:text-green-700"
                 >
@@ -37,17 +47,17 @@ const ProductTableDropdownMenu = ({ product }: { product: Products }) => {
               <DropdownMenuContent>
                 <DropdownMenuItem
                   onClick={async () => {
-                    await navigator.clipboard.writeText(product.id);
+                    await navigator.clipboard.writeText(sale.id);
                     toast.success("ID copiado para a área de transferência");
                   }}
                 >
                   <ClipboardCopy size={16} /> Copiar ID
                 </DropdownMenuItem>
-                <DialogTrigger asChild>
+                <SheetTrigger asChild>
                   <DropdownMenuItem>
                     <SquarePen size={16} /> Editar
                   </DropdownMenuItem>
-                </DialogTrigger>
+                </SheetTrigger>
                 <AlertDialogTrigger asChild>
                   <DropdownMenuItem>
                     <Trash size={16} /> Excluir
@@ -55,21 +65,12 @@ const ProductTableDropdownMenu = ({ product }: { product: Products }) => {
                 </AlertDialogTrigger>
               </DropdownMenuContent>
             </DropdownMenu>
-            <DeleteProductDialog id={product.id} />
           </AlertDialog>
-          <ProductForm
-            setIsOpen={setIsEditFormOpen}
-            defaultValues={{
-              id: product.id,
-              name: product.name,
-              priceInCents: product.priceInCents,
-              stock: product.stock,
-            }}
-          />
-        </Dialog>
+          {/* <SalesForm setIsOpen={setIsEditFormOpen} productOption={sale.SalesToProduct} /> */}
+        </Sheet>
       </span>
     </div>
   );
 };
 
-export default ProductTableDropdownMenu;
+export default SalesTableDropdownMenu;

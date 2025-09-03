@@ -35,7 +35,6 @@ interface IProductForm {
 
 const ProductForm = ({ defaultValues, setIsOpen }: IProductForm) => {
   const isEdit = defaultValues;
-  console.log("defaultValues", defaultValues);
 
   const form = useForm<z.infer<typeof upsertProductSchema>>({
     resolver: zodResolver(upsertProductSchema),
