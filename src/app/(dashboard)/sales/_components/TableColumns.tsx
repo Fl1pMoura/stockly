@@ -19,7 +19,7 @@ export const salesTableColumns: ColumnDef<
   }>
 >[] = [
   {
-    accessorKey: "products",
+    accessorKey: "SalesToProduct",
     header: () => {
       return (
         <div className="p-4">
@@ -28,15 +28,35 @@ export const salesTableColumns: ColumnDef<
       );
     },
     cell: ({ row }) => {
+      const allProducts = row
+        .getValue<
+          Prisma.SalesToProductGetPayload<{
+            include: {
+              product: true;
+            };
+          }>[]
+        >("SalesToProduct")
+        .map((item) => item.product.name);
       return (
         <div className="p-4">
-          <span>{row.getValue("name")}</span>
+          <ul className="flex items-center text-sm font-medium text-slate-900">
+            <li className="noscrollbar flex max-w-[180px] overflow-auto">
+              {allProducts.map((product, index) => (
+                <div className="flex items-center" key={index}>
+                  <span>{product}</span>
+                  {index < allProducts.length - 1 && (
+                    <span className="mx-2 size-[5px] rounded-full bg-slate-500"></span>
+                  )}
+                </div>
+              ))}
+            </li>
+          </ul>
         </div>
       );
     },
   },
   {
-    accessorKey: "productsQuantity",
+    accessorKey: "quantity",
     header: () => {
       return (
         <div className="p-4">
@@ -47,17 +67,27 @@ export const salesTableColumns: ColumnDef<
     cell: ({ row }) => {
       return (
         <div className="p-4">
-          <span>{row.getValue("productsQuantity")}</span>
+          <span>
+            {row
+              .getValue<
+                Prisma.SalesToProductGetPayload<{
+                  include: {
+                    product: true;
+                  };
+                }>[]
+              >("SalesToProduct")
+              .reduce((acc, item) => acc + item.quantity, 0)}
+          </span>
         </div>
       );
     },
   },
   {
-    accessorKey: "price",
+    accessorKey: "totalPriceInCents",
     header: () => {
       return (
         <div className="p-4">
-          <span>Preço</span>
+          <span>Valor total</span>
         </div>
       );
     },
@@ -68,7 +98,23 @@ export const salesTableColumns: ColumnDef<
             {new Intl.NumberFormat("pt-BR", {
               style: "currency",
               currency: "BRL",
-            }).format(Number(row.getValue("price")))}
+            }).format(
+              Number(
+                row
+                  .getValue<
+                    Prisma.SalesToProductGetPayload<{
+                      include: {
+                        product: true;
+                      };
+                    }>[]
+                  >("SalesToProduct")
+                  .reduce(
+                    (acc, item) =>
+                      acc + (item.product.priceInCents / 100) * item.quantity,
+                    0,
+                  ),
+              ),
+            )}
           </span>
         </div>
       );
@@ -91,7 +137,7 @@ export const salesTableColumns: ColumnDef<
               day: "2-digit",
               month: "2-digit",
               year: "numeric",
-            }).format(new Date(row.getValue("date")))}
+            }).format(row.getValue("date"))}
           </span>
         </div>
       );

@@ -11,13 +11,17 @@ import { z } from "zod";
 //   SalesToProduct SalesToProduct[]
 // }
 
-const upsertSalesSchema = z.object({
-  productId: z.uuid({
-    error: "Produto é obrigatório",
-  }),
-  quantity: z.coerce.number<number>().min(1, {
-    error: "Quantidade é obrigatória",
-  }),
+export const upsertSalesSchema = z.object({
+  products: z.array(
+    z.object({
+      id: z.uuid({
+        error: "Produto é obrigatório",
+      }),
+      quantity: z.number().positive({
+        error: "Quantidade é obrigatória",
+      }),
+    }),
+  ),
 });
 
-export { upsertSalesSchema };
+export type UpsertSalesSchema = z.infer<typeof upsertSalesSchema>;

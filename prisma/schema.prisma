@@ -26,11 +26,9 @@ model Product {
 }
 
 model Sales {
-  id           String   @id @default(uuid())
-  quantity     Int
-  priceInCents Int
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   SalesToProduct SalesToProduct[]
 }

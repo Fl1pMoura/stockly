@@ -1,5 +1,5 @@
 "use client";
-import { upsertSalesSchema } from "@/app/_actions/sales/upsert-sale/schema";
+import { upsertSales } from "@/app/_actions/sales/upsert-sale";
 import { Button } from "@/app/_components/ui/button";
 import { Combobox, ComboboxOption } from "@/app/_components/ui/combobox";
 import {
@@ -21,6 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import z from "zod";
 
 interface ISalesFormProps {
@@ -28,6 +29,17 @@ interface ISalesFormProps {
   productOption: ComboboxOption[];
   setIsOpen?: (open: boolean) => void;
 }
+
+const formSchema = z.object({
+  productId: z.string().uuid({
+    message: "O produto é obrigatório.",
+  }),
+  quantity: z.coerce.number<number>().int().positive({
+    message: "A quantidade é obrigatória.",
+  }),
+});
+
+type formSchemaType = z.infer<typeof formSchema>;
 
 interface SelectedProduct {
   id: string;
@@ -37,8 +49,8 @@ interface SelectedProduct {
 }
 
 const SalesForm = ({ productOption, setIsOpen, products }: ISalesFormProps) => {
-  const form = useForm<z.infer<typeof upsertSalesSchema>>({
-    resolver: zodResolver(upsertSalesSchema),
+  const form = useForm<formSchemaType>({
+    resolver: zodResolver(formSchema),
     values: {
       productId: "",
       quantity: 1,
@@ -48,54 +60,78 @@ const SalesForm = ({ productOption, setIsOpen, products }: ISalesFormProps) => {
     [],
   );
 
-  const onSubmit = (data: z.infer<typeof upsertSalesSchema>) => {
+  const onSubmit = (data: formSchemaType) => {
     const selectecProduct = products.find(
       (product) => product.id === data.productId,
     );
     if (!selectecProduct) {
       return;
     }
-    setSelectedProducts((currentProducts) => {
-      const existingProduct = currentProducts.find(
-        (product) => product.id === selectecProduct.id,
-      );
-      if (existingProduct) {
-        const productOutOfStock =
-          existingProduct.quantity + data.quantity > selectecProduct.stock;
-        if (productOutOfStock) {
-          form.setError("quantity", {
-            message: "Quantidade maior que o estoque disponível",
-          });
-          return currentProducts;
-        }
-        form.reset();
-        return [
-          ...currentProducts.filter(
-            (product) => product.id !== selectecProduct.id,
-          ),
-          {
-            id: selectecProduct.id,
-            name: selectecProduct.name,
-            priceInCents: selectecProduct.priceInCents,
-            quantity: existingProduct.quantity + data.quantity,
-          },
-        ];
-      }
+
+    const existingProduct = selectedProducts.find(
+      (product) => product.id === selectecProduct.id,
+    );
+
+    const productOutOfStock =
+      (existingProduct?.quantity ?? 0) + data.quantity > selectecProduct.stock;
+
+    if (productOutOfStock) {
+      setTimeout(() => {
+        form.setError("quantity", {
+          message: "Quantidade maior que o estoque disponível",
+        });
+      }, 0);
+      return;
+    }
+
+    if (existingProduct) {
       form.reset();
-      return [
-        ...currentProducts,
+      setSelectedProducts((currentProducts) => [
+        ...currentProducts.filter(
+          (product) => product.id !== selectecProduct.id,
+        ),
         {
           id: selectecProduct.id,
           name: selectecProduct.name,
           priceInCents: selectecProduct.priceInCents,
-          quantity: data.quantity,
+          quantity: existingProduct.quantity + data.quantity,
         },
-      ];
-    });
+      ]);
+      return;
+    }
+
+    form.reset();
+    setSelectedProducts((currentProducts) => [
+      ...currentProducts,
+      {
+        id: selectecProduct.id,
+        name: selectecProduct.name,
+        priceInCents: selectecProduct.priceInCents,
+        quantity: data.quantity,
+      },
+    ]);
   };
 
   const handleRemoveProduct = (index: number) => {
     setSelectedProducts(selectedProducts.filter((_, i) => i !== index));
+  };
+
+  const handleSaleSubmit = async () => {
+    try {
+      await upsertSales({
+        products: selectedProducts.map((product) => ({
+          id: product.id,
+          quantity: product.quantity,
+        })),
+      });
+      toast.success("Venda realizada com sucesso");
+      setIsOpen?.(false);
+      setSelectedProducts([]);
+      form.reset();
+    } catch (err) {
+      console.log(err);
+      toast.error("Erro ao realizar venda");
+    }
   };
 
   return (
@@ -215,7 +251,11 @@ const SalesForm = ({ productOption, setIsOpen, products }: ISalesFormProps) => {
                 )}
               </h2>
 
-              <Button className="mt-6 w-full" type="submit">
+              <Button
+                className="mt-6 w-full"
+                type="submit"
+                onClick={handleSaleSubmit}
+              >
                 Salvar venda
               </Button>
             </div>
