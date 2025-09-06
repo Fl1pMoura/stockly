@@ -1,6 +1,7 @@
 "use client";
 import { upsertProduct } from "@/app/_actions/product/upsert-product";
 import { upsertProductSchema } from "@/app/_actions/product/upsert-product/schema";
+import Spinner from "@/app/_components/Spinner";
 import { Button } from "@/app/_components/ui/button";
 import {
   DialogClose,
@@ -18,6 +19,8 @@ import {
 } from "@/app/_components/ui/form";
 import { Input } from "@/app/_components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { flattenValidationErrors } from "next-safe-action";
+import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
 import { toast } from "sonner";
@@ -45,12 +48,23 @@ const ProductForm = ({ defaultValues, setIsOpen }: IProductForm) => {
     },
   });
 
+  const { execute: executeUpsertProduct, isPending } = useAction(
+    upsertProduct,
+    {
+      onSuccess: () => {
+        toast.success("Produto salvo com sucesso");
+        form.reset();
+        setIsOpen(false);
+      },
+      onError: ({ error: { validationErrors, serverError } }) => {
+        const flatennedError = flattenValidationErrors(validationErrors);
+        toast.error(serverError ?? flatennedError.formErrors[0]);
+      },
+    },
+  );
+
   const onSubmit = (data: z.infer<typeof upsertProductSchema>) => {
-    data.priceInCents = Number(data.priceInCents) * 100;
-    upsertProduct(data);
-    toast.success("Produto salvo com sucesso");
-    form.reset();
-    setIsOpen(false);
+    executeUpsertProduct(data);
   };
 
   return (
@@ -127,8 +141,16 @@ const ProductForm = ({ defaultValues, setIsOpen }: IProductForm) => {
                 Cancelar
               </Button>
             </DialogClose>
-            <Button className="w-1/2" type="submit">
-              {isEdit ? "Atualizar Produto" : "Criar Produto"}
+            <Button className="w-1/2" type="submit" disabled={isPending}>
+              {!isPending ? (
+                isEdit ? (
+                  "Atualizar Produto"
+                ) : (
+                  "Criar Produto"
+                )
+              ) : (
+                <Spinner />
+              )}
             </Button>
           </div>
         </form>

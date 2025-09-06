@@ -1,16 +1,22 @@
 "use server";
 import { db } from "@/app/_lib/prisma";
+import { actionClient } from "@/app/_lib/safe-action";
+import { returnValidationErrors } from "next-safe-action";
 import { revalidatePath } from "next/cache";
-import z from "zod";
 import { deleteProductSchema } from "./schema";
 
-export const deleteProduct = async (
-  data: z.infer<typeof deleteProductSchema>,
-) => {
-  await db.product.delete({
-    where: {
-      id: data.id,
-    },
+export const deleteProduct = actionClient
+  .inputSchema(deleteProductSchema)
+  .action(async ({ parsedInput: { id } }) => {
+    if (!id) {
+      returnValidationErrors(deleteProductSchema, {
+        _errors: ["ID do produto é necessário"],
+      });
+    }
+    await db.product.delete({
+      where: {
+        id,
+      },
+    });
+    revalidatePath("/products");
   });
-  revalidatePath("/products");
-};

@@ -1,5 +1,6 @@
 import { deleteProduct } from "@/app/_actions/product/delete-product";
 import { deleteProductSchema } from "@/app/_actions/product/delete-product/schema";
+import Spinner from "@/app/_components/Spinner";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -9,15 +10,28 @@ import {
   AlertDialogTitle,
 } from "@/app/_components/ui/alert-dialog";
 import { Button } from "@/app/_components/ui/button";
+import { flattenValidationErrors } from "next-safe-action";
+import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 import z from "zod";
 
 const DeleteProductDialog = ({ id }: z.infer<typeof deleteProductSchema>) => {
+  const { execute: executeDeleteProduct, isPending } = useAction(
+    deleteProduct,
+    {
+      onSuccess: () => {
+        toast.success("Produto excluído com sucesso");
+      },
+      onError: ({ error: { validationErrors, serverError } }) => {
+        const flatennedError = flattenValidationErrors(validationErrors);
+        toast.error(serverError ?? flatennedError.formErrors[0]);
+      },
+    },
+  );
   const handleDelete = async () => {
-    await deleteProduct({
+    executeDeleteProduct({
       id,
     });
-    toast.success("Produto excluído com sucesso");
   };
   return (
     <AlertDialogContent>
@@ -34,8 +48,9 @@ const DeleteProductDialog = ({ id }: z.infer<typeof deleteProductSchema>) => {
             variant="destructive"
             onClick={handleDelete}
             className="w-1/2"
+            disabled={isPending}
           >
-            Excluir
+            {isPending ? <Spinner /> : "Excluir"}
           </Button>
         </AlertDialogAction>
       </AlertDialogFooter>

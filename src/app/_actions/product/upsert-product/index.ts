@@ -1,26 +1,26 @@
 "use server";
 import { db } from "@/app/_lib/prisma";
+import { actionClient } from "@/app/_lib/safe-action";
 import { revalidatePath } from "next/cache";
-import z from "zod";
 import { upsertProductSchema } from "./schema";
 
-export const upsertProduct = async (
-  data: z.infer<typeof upsertProductSchema>,
-) => {
-  await db.product.upsert({
-    where: {
-      id: data.id ?? "",
-    },
-    update: {
-      name: data.name,
-      priceInCents: data.priceInCents,
-      stock: data.stock,
-    },
-    create: {
-      name: data.name,
-      priceInCents: data.priceInCents,
-      stock: data.stock,
-    },
+export const upsertProduct = actionClient
+  .inputSchema(upsertProductSchema)
+  .action(async ({ parsedInput: { id, name, priceInCents, stock } }) => {
+    await db.product.upsert({
+      where: {
+        id: id ?? "",
+      },
+      update: {
+        name,
+        priceInCents,
+        stock,
+      },
+      create: {
+        name,
+        priceInCents,
+        stock,
+      },
+    });
+    revalidatePath("/products");
   });
-  revalidatePath("/products");
-};
