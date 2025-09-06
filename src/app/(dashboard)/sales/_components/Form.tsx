@@ -1,5 +1,6 @@
 "use client";
 import { upsertSales } from "@/app/_actions/sales/upsert-sale";
+import Spinner from "@/app/_components/Spinner";
 import { Button } from "@/app/_components/ui/button";
 import { Combobox, ComboboxOption } from "@/app/_components/ui/combobox";
 import {
@@ -19,6 +20,8 @@ import {
 import { Product } from "@/generated/prisma";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash } from "lucide-react";
+import { flattenValidationErrors } from "next-safe-action";
+import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -116,22 +119,26 @@ const SalesForm = ({ productOption, setIsOpen, products }: ISalesFormProps) => {
     setSelectedProducts(selectedProducts.filter((_, i) => i !== index));
   };
 
-  const handleSaleSubmit = async () => {
-    try {
-      await upsertSales({
-        products: selectedProducts.map((product) => ({
-          id: product.id,
-          quantity: product.quantity,
-        })),
-      });
+  const { execute: executeUpsertSales, isPending } = useAction(upsertSales, {
+    onError: ({ error: { validationErrors, serverError } }) => {
+      const flatennedError = flattenValidationErrors(validationErrors);
+      toast.error(serverError ?? flatennedError.formErrors[0]);
+    },
+    onSuccess: () => {
       toast.success("Venda realizada com sucesso");
       setIsOpen?.(false);
       setSelectedProducts([]);
       form.reset();
-    } catch (err) {
-      console.log(err);
-      toast.error("Erro ao realizar venda");
-    }
+    },
+  });
+
+  const handleSaleSubmit = async () => {
+    await executeUpsertSales({
+      products: selectedProducts.map((product) => ({
+        id: product.id,
+        quantity: product.quantity,
+      })),
+    });
   };
 
   return (
@@ -181,8 +188,8 @@ const SalesForm = ({ productOption, setIsOpen, products }: ISalesFormProps) => {
               </FormItem>
             )}
           />
-          <Button className="w-full" type="submit">
-            Adicionar produto
+          <Button className="w-full" type="submit" disabled={isPending}>
+            {isPending ? <Spinner /> : "Adicionar produto"}
           </Button>
         </form>
         {selectedProducts.length > 0 && (
@@ -256,7 +263,7 @@ const SalesForm = ({ productOption, setIsOpen, products }: ISalesFormProps) => {
                 type="submit"
                 onClick={handleSaleSubmit}
               >
-                Salvar venda
+                {isPending ? <Spinner /> : "Finalizar venda"}
               </Button>
             </div>
           </>
