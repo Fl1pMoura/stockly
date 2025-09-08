@@ -110,7 +110,7 @@ export const salesTableColumns: ColumnDef<SalesDto>[] = [
       );
     },
     cell: ({ row }) => {
-      return <SalesTableDropdownMenu saleId={row.original.id} />;
+      return <SalesTableDropdownMenu sale={row.original} />;
     },
   },
 ];

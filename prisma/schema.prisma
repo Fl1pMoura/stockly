@@ -44,8 +44,8 @@ model SalesToProduct {
   salesId   String
   productId String
 
-  product Product @relation(fields: [productId], references: [id])
-  sales   Sales   @relation(fields: [salesId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sales   Sales   @relation(fields: [salesId], references: [id], onDelete: Cascade)
 
   @@unique([salesId, productId])
 }

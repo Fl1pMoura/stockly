@@ -10,11 +10,18 @@ import {
   DropdownMenuTrigger,
 } from "@/app/_components/ui/dropdown-menu";
 import { Sheet, SheetTrigger } from "@/app/_components/ui/sheet";
+import { Sales } from "@/generated/prisma";
+import { Pick } from "@/generated/prisma/runtime/library";
 import { ClipboardCopy, Ellipsis, SquarePen, Trash } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import DeleteDialog from "./DeleteDialog";
 
-const SalesTableDropdownMenu = ({ saleId }: { saleId: string }) => {
+interface SalesTableDropdownMenuProps {
+  sale: Pick<Sales, "id">;
+}
+
+const SalesTableDropdownMenu = ({ sale }: SalesTableDropdownMenuProps) => {
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   return (
     <div className="p-4">
@@ -24,7 +31,7 @@ const SalesTableDropdownMenu = ({ saleId }: { saleId: string }) => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  aria-details={saleId}
+                  aria-details={sale.id}
                   variant={"ghost"}
                   className="text-green-500 hover:text-green-700"
                 >
@@ -34,7 +41,7 @@ const SalesTableDropdownMenu = ({ saleId }: { saleId: string }) => {
               <DropdownMenuContent>
                 <DropdownMenuItem
                   onClick={async () => {
-                    await navigator.clipboard.writeText(saleId);
+                    await navigator.clipboard.writeText(sale.id);
                     toast.success("ID copiado para a área de transferência");
                   }}
                 >
@@ -52,6 +59,7 @@ const SalesTableDropdownMenu = ({ saleId }: { saleId: string }) => {
                 </AlertDialogTrigger>
               </DropdownMenuContent>
             </DropdownMenu>
+            <DeleteDialog id={sale.id} />
           </AlertDialog>
           {/* <SalesForm setIsOpen={setIsEditFormOpen} productOption={sale.SalesToProduct} /> */}
         </Sheet>
