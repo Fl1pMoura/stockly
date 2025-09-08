@@ -10,24 +10,11 @@ import {
   DropdownMenuTrigger,
 } from "@/app/_components/ui/dropdown-menu";
 import { Sheet, SheetTrigger } from "@/app/_components/ui/sheet";
-import { Prisma } from "@/generated/prisma";
 import { ClipboardCopy, Ellipsis, SquarePen, Trash } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-const SalesTableDropdownMenu = ({
-  sale,
-}: {
-  sale: Prisma.SalesGetPayload<{
-    include: {
-      SalesToProduct: {
-        include: {
-          product: true;
-        };
-      };
-    };
-  }>;
-}) => {
+const SalesTableDropdownMenu = ({ saleId }: { saleId: string }) => {
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   return (
     <div className="p-4">
@@ -37,7 +24,7 @@ const SalesTableDropdownMenu = ({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  aria-details={sale.id}
+                  aria-details={saleId}
                   variant={"ghost"}
                   className="text-green-500 hover:text-green-700"
                 >
@@ -47,7 +34,7 @@ const SalesTableDropdownMenu = ({
               <DropdownMenuContent>
                 <DropdownMenuItem
                   onClick={async () => {
-                    await navigator.clipboard.writeText(sale.id);
+                    await navigator.clipboard.writeText(saleId);
                     toast.success("ID copiado para a área de transferência");
                   }}
                 >

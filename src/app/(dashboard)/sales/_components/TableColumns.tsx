@@ -1,25 +1,15 @@
 "use client";
 
-import { Prisma } from "@/generated/prisma";
+import { SalesDto } from "@/app/_data/sales/get-sales";
 import { ColumnDef } from "@tanstack/react-table";
 import SalesTableDropdownMenu from "./TableDropdownMenu";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 
-export const salesTableColumns: ColumnDef<
-  Prisma.SalesGetPayload<{
-    include: {
-      SalesToProduct: {
-        include: {
-          product: true;
-        };
-      };
-    };
-  }>
->[] = [
+export const salesTableColumns: ColumnDef<SalesDto>[] = [
   {
-    accessorKey: "SalesToProduct",
+    accessorKey: "productNames",
     header: () => {
       return (
         <div className="p-4">
@@ -28,15 +18,8 @@ export const salesTableColumns: ColumnDef<
       );
     },
     cell: ({ row }) => {
-      const allProducts = row
-        .getValue<
-          Prisma.SalesToProductGetPayload<{
-            include: {
-              product: true;
-            };
-          }>[]
-        >("SalesToProduct")
-        .map((item) => item.product.name);
+      const allProducts = row.original.productNames.split(",");
+      console.log(allProducts);
       return (
         <div className="p-4">
           <ul className="flex items-center text-sm font-medium text-slate-900">
@@ -56,7 +39,7 @@ export const salesTableColumns: ColumnDef<
     },
   },
   {
-    accessorKey: "quantity",
+    accessorKey: "totalProducts",
     header: () => {
       return (
         <div className="p-4">
@@ -67,23 +50,13 @@ export const salesTableColumns: ColumnDef<
     cell: ({ row }) => {
       return (
         <div className="p-4">
-          <span>
-            {row
-              .getValue<
-                Prisma.SalesToProductGetPayload<{
-                  include: {
-                    product: true;
-                  };
-                }>[]
-              >("SalesToProduct")
-              .reduce((acc, item) => acc + item.quantity, 0)}
-          </span>
+          <span>{row.original.totalProducts}</span>
         </div>
       );
     },
   },
   {
-    accessorKey: "totalPriceInCents",
+    accessorKey: "totalAmount",
     header: () => {
       return (
         <div className="p-4">
@@ -98,30 +71,14 @@ export const salesTableColumns: ColumnDef<
             {new Intl.NumberFormat("pt-BR", {
               style: "currency",
               currency: "BRL",
-            }).format(
-              Number(
-                row
-                  .getValue<
-                    Prisma.SalesToProductGetPayload<{
-                      include: {
-                        product: true;
-                      };
-                    }>[]
-                  >("SalesToProduct")
-                  .reduce(
-                    (acc, item) =>
-                      acc + (item.product.priceInCents / 100) * item.quantity,
-                    0,
-                  ),
-              ),
-            )}
+            }).format(Number(row.original.totalAmount))}
           </span>
         </div>
       );
     },
   },
   {
-    accessorKey: "date",
+    accessorKey: "createdAt",
     header: () => {
       return (
         <div className="p-4">
@@ -137,7 +94,7 @@ export const salesTableColumns: ColumnDef<
               day: "2-digit",
               month: "2-digit",
               year: "numeric",
-            }).format(row.getValue("date"))}
+            }).format(row.getValue("createdAt"))}
           </span>
         </div>
       );
@@ -153,7 +110,7 @@ export const salesTableColumns: ColumnDef<
       );
     },
     cell: ({ row }) => {
-      return <SalesTableDropdownMenu sale={row.original} />;
+      return <SalesTableDropdownMenu saleId={row.original.id} />;
     },
   },
 ];
