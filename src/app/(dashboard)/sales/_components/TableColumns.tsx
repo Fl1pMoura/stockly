@@ -1,13 +1,19 @@
 "use client";
 
+import { ComboboxOption } from "@/app/_components/ui/combobox";
+import { ProductDto } from "@/app/_data/products/get-products";
 import { SalesDto } from "@/app/_data/sales/get-sales";
 import { ColumnDef } from "@tanstack/react-table";
 import SalesTableDropdownMenu from "./TableDropdownMenu";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
+interface SalesTableDropdownMenuProps extends SalesDto {
+  productOptions: ComboboxOption[];
+  products: ProductDto[];
+}
 
-export const salesTableColumns: ColumnDef<SalesDto>[] = [
+export const salesTableColumns: ColumnDef<SalesTableDropdownMenuProps>[] = [
   {
     accessorKey: "productNames",
     header: () => {
@@ -110,7 +116,13 @@ export const salesTableColumns: ColumnDef<SalesDto>[] = [
       );
     },
     cell: ({ row }) => {
-      return <SalesTableDropdownMenu sale={row.original} />;
+      return (
+        <SalesTableDropdownMenu
+          sale={row.original}
+          productOptions={row.original.productOptions}
+          products={row.original.products}
+        />
+      );
     },
   },
 ];

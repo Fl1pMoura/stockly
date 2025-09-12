@@ -17,7 +17,7 @@ import {
   SheetDescription,
   SheetTitle,
 } from "@/app/_components/ui/sheet";
-import { Product } from "@/generated/prisma";
+import { ProductDto } from "@/app/_data/products/get-products";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash } from "lucide-react";
 import { flattenValidationErrors } from "next-safe-action";
@@ -28,13 +28,13 @@ import { toast } from "sonner";
 import z from "zod";
 
 interface ISalesFormProps {
-  products: Product[];
-  productOption: ComboboxOption[];
+  products: ProductDto[];
+  productOptions: ComboboxOption[];
   setIsOpen?: (open: boolean) => void;
 }
 
 const formSchema = z.object({
-  productId: z.string().uuid({
+  productId: z.uuid({
     message: "O produto é obrigatório.",
   }),
   quantity: z.coerce.number<number>().int().positive({
@@ -51,7 +51,11 @@ interface SelectedProduct {
   quantity: number;
 }
 
-const SalesForm = ({ productOption, setIsOpen, products }: ISalesFormProps) => {
+const SalesForm = ({
+  productOptions,
+  setIsOpen,
+  products,
+}: ISalesFormProps) => {
   const form = useForm<formSchemaType>({
     resolver: zodResolver(formSchema),
     values: {
@@ -162,7 +166,7 @@ const SalesForm = ({ productOption, setIsOpen, products }: ISalesFormProps) => {
                     {...field}
                     placeholder="Selecione o produto"
                     value={field.value ?? ""}
-                    options={productOption.map((item) => ({
+                    options={productOptions.map((item) => ({
                       value: item.value,
                       label: item.label,
                     }))}
@@ -207,7 +211,7 @@ const SalesForm = ({ productOption, setIsOpen, products }: ISalesFormProps) => {
                     <div>
                       <p className="font-medium">
                         {
-                          productOption.find(
+                          productOptions.find(
                             (item) => item.value === selectedProducts[index].id,
                           )?.label
                         }

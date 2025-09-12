@@ -7,6 +7,12 @@ export interface SalesDto extends Sales {
   productNames: string;
   totalProducts: number;
   totalAmount: number;
+  salesToProduct: {
+    product: {
+      name: string;
+    };
+    quantity: number;
+  }[];
 }
 
 export const getSales = async (): Promise<SalesDto[]> => {
@@ -33,6 +39,12 @@ export const getSales = async (): Promise<SalesDto[]> => {
       (acc, cur) => acc + (cur.quantity * cur.product.priceInCents) / 100,
       0,
     ),
+    salesToProduct: sale.SalesToProduct.map((item) => ({
+      product: {
+        name: item.product.name,
+      },
+      quantity: item.quantity,
+    })),
     createdAt: sale.createdAt,
     updatedAt: sale.updatedAt,
   }));
